@@ -1,7 +1,8 @@
 import subprocess as sp
 import mysql.connector
+import sys
 
-n = 10
+n = int(sys.argv[1])
 
 conn = mysql.connector.connect(
   host="localhost",
@@ -21,11 +22,9 @@ c.execute("CREATE TABLE t (i INT PRIMARY KEY, j INT) Engine=InnoDB;")
 for i in range (n):
     c.execute("INSERT INTO t (i, j) VALUES (%s, %s)", (i, 0))
 
-
-
 conn.commit()
 conn.close()
 
 command = " & ".join(map(lambda i: f"python3.10 expr.py {i} {n}" , range(n)))
-print(command)
+# print(command)
 sp.run(command, shell=True)

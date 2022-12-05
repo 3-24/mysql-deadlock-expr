@@ -1,30 +1,22 @@
 import subprocess as sp
-import mysql.connector
-import sys
 
-n = int(sys.argv[1])
+REPT = 10
 
-conn = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  port=3306,
-  database="deadlock",
-  password="password",
-  autocommit=False
-)
+def average_time():
+    with open("result.txt", 'r') as f:
+        l = list(map(float, f.readlines()))
+    
+    #assert (len(l) == REPT)
 
+    return sum(l) / len(l)
 
-c = conn.cursor()
+for n in range (2, 401):
+    for _ in range (REPT):
+        sp.run(f"python3.10 unit.py {n}", shell=True)
+    
+    t = average_time()
+    print(n, t)
+    with open("total.txt", "a") as f:
+        f.write(f"{n} {t}\n")
 
-c.execute("DROP TABLE t;")
-c.execute("CREATE TABLE t (i INT PRIMARY KEY, j INT) Engine=InnoDB;")
-
-for i in range (n):
-    c.execute("INSERT INTO t (i, j) VALUES (%s, %s)", (i, 0))
-
-conn.commit()
-conn.close()
-
-command = " & ".join(map(lambda i: f"python3.10 expr.py {i} {n}" , range(n)))
-# print(command)
-sp.run(command, shell=True)
+    sp.run("rm result.txt", shell=True)
